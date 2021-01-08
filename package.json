@@ -1,5 +1,7 @@
 {
     "dependencies": {
-        "clickhouse": "^2.2.1"
+        "@apla/clickhouse": "^1.6.4",
+        "clickhouse": "^2.2.1",
+        "stream-json": "^1.7.1"
     }
 }
