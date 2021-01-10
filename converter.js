@@ -23,6 +23,10 @@ re = new RegExp(pattern, "g");
  * из которых состоит массив, это необходимо для использования 
  * по объектного чтения в дальнейшем, для загрузки в ClickHouse
  */
+
+let startTime = new Date().toLocaleTimeString();
+console.log('Start time__' + startTime);
+
 lineReader.on('line', function (line) {
 
     if (line.indexOf(title) !== -1) {
@@ -75,3 +79,8 @@ lineReader.on('line', function (line) {
     writeStream.write(line);
     //console.log(line);
 });
+
+lineReader.on('close',function() {
+    let endTime = new Date().toLocaleTimeString();
+    console.log('Start time__' + startTime + '__End Time__' + endTime);
+})
