@@ -80,7 +80,7 @@ lineReader.on('line', function (line) {
     //console.log(line);
 });
 
-lineReader.on('close',function() {
+writeStream.on('close',function() {
     let endTime = new Date().toLocaleTimeString();
     console.log('Start time__' + startTime + '__End Time__' + endTime);
-})
+});
