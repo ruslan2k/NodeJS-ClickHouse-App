@@ -1,12 +1,12 @@
 const fs = require('fs');
 const readline = require('readline');
 
-let path = 'C:/Users/mne21/Desktop/array.json';
+let readPth = 'C:/Users/mne21/Desktop/array.json';
 let writePth = 'C:/Users/mne21/Desktop/test_write.json';
 let writeStream = new fs.WriteStream(writePth,{encoding: 'utf8'},{flags: 'a'})
 
 let lineReader = readline.createInterface({
-    input: fs.createReadStream(path)
+    input: fs.createReadStream(readPth)
 });
 
 let firstPos;
@@ -15,10 +15,14 @@ let snipet = "\"Snippet\":";
 let url = "\"Url\":";
 let badWord;
 
-let pattern = "\"";
+let pattern = /\"|\\/;
 re = new RegExp(pattern, "g");
-
-
+/**
+ * парсинг файл по строчно и для определенных строк
+ * убираем символы которые мешают валидации json объектов
+ * из которых состоит массив, это необходимо для использования 
+ * по объектного чтения в дальнейшем, для загрузки в ClickHouse
+ */
 lineReader.on('line', function (line) {
 
     if (line.indexOf(title) !== -1) {
