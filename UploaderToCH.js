@@ -1,17 +1,23 @@
+/*
+Скрипт дл вставки данных в БД Yandex ClickHouse
+*/
 const fs = require('fs');
+const path = require('path');
 const ClickHouse = require('@apla/clickhouse');
 const Batch = require('stream-json/utils/Batch');
 const StreamArray = require('stream-json/streamers/StreamArray');
 const {chain} = require('stream-chain');
 
-const CH = new ClickHouse({ host: 'localhost', port: '8123', user: 'default', password: 'hiclick10' })
-let path = 'C:/Users/mne21/Desktop/small.json';
-const maxArrLen = 10000; //разработчик ClickHouse рекомендует вставлять пачками от 100000
+const CH = new ClickHouse({ host: 'localhost', port: '8123', user: 'default', password: '' })
+let fullFilePath = '/home/isiv/Desktop/Projects/ClickHouse_NodeJS/2020_Nov-30_19-01-11.json';
+const maxArrLen = 10000; // объем пачки даннных для вставки в CH
 let recDbStream;
 let cntPush = 0;
 
+let fileDate = GetDateByFileName(path.parse(path.basename(fullFilePath)).name);
+
 const pipeline = chain([
-    fs.createReadStream(path,{encoding: 'utf8'}),
+    fs.createReadStream(fullFilePath,{encoding: 'utf8'}),
     StreamArray.withParser(),
     new Batch({batchSize: maxArrLen})
 ]);
@@ -20,7 +26,7 @@ const pipeline = chain([
 pipeline.on('data', data => {
     cntPush = cntPush + maxArrLen;
 
-    let objArrForDb = GetDataArr(data);
+    let objArrForDb = GetDataArr(data,fileDate);
     recDbStream = CreateDbStream();
     recDbStream.write(objArrForDb);
     recDbStream.end();
@@ -55,7 +61,7 @@ function CreateDbStream() {
 /**
  * Transform chunk(json array) to JSONEachRow format for write to CH
  */
-function GetDataArr(data) {
+function GetDataArr(data,eventDt) {
     let allObjects = '';
     let grMaxLen = 0;
     let srMaxLen = 0;
@@ -67,6 +73,7 @@ function GetDataArr(data) {
         // main mapping
         oneObj =
         {
+            "EventDate": eventDt,
             "Keyword": item['value']['Keyword'],
             "Total": item['value']['Total'],
             "Items" : item['value']['Items'].join(";"),
@@ -159,4 +166,33 @@ function ParseArrInArr(arr , nameElement) {
         }
     });
     return res;
+}
+
+/**
+ * ClickHouse settings date_time_output_format : basic parser can parse only '2019-01-01 00:00:00' format
+ * parse file names like - 2020_Dec-01_15-51-55 -----> CH '2019-01-01 00:00:00'
+ */
+ function GetDateByFileName(fileName) {
+
+    let dt;
+    dt = fileName.replace(/-/g, ':');
+    dt = dt.replace('_', '-');
+    dt = dt.replace('_', ' ');
+    dt = dt.replace(':', '-');
+
+    let unix_timestamp = Date.parse(dt);
+
+    let fullDt = new Date(unix_timestamp);
+
+    let dtYear = fullDt.getFullYear();
+    let dtMounts = fullDt.getUTCMonth() + 1;
+    let dtDay = fullDt.getUTCDate();
+    let dtHour = fullDt.getHours();
+    let dtMin = fullDt.getMinutes();
+    let dtSec = fullDt.getSeconds();
+
+    let dtForCH = dtYear + "-" + ("0" +  dtMounts).slice(-2) + "-" + ("0" + dtDay).slice(-2) + " " + 
+                    ("0" + dtHour).slice(-2) + ":" + ("0" +  dtMin).slice(-2) + ":" + ("0" +  dtSec).slice(-2) ;
+
+    return dtForCH;
 }

@@ -1,4 +1,5 @@
 CREATE TABLE WellData.SearchRes (
+  `EventDate` DateTime,
   `Keyword` String,
   `Total` String,
   `Items` String,
@@ -12,10 +13,11 @@ CREATE TABLE WellData.SearchRes (
   `GR.SiteUrls` Array(String)
 ) ENGINE = MergeTree()
 ORDER BY
-  Keyword SETTINGS index_granularity = 8192
+  EventDate SETTINGS index_granularity = 8192
 
-CREATE TABLE SearchRes
+CREATE TABLE WellData.SearchRes
 (
+    EventDate DateTime,
     Keyword String,
     Total String,
     Items String,
@@ -35,4 +37,4 @@ CREATE TABLE SearchRes
     )
 )
 ENGINE = MergeTree()
-ORDER BY Keyword;
+ORDER BY EventDate;
