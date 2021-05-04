@@ -17,6 +17,7 @@ module.exports = {
         let cntPush = 0;
 
         let fileDate = GetDateByFileName(path.parse(path.basename(fullFilePath)).name);
+        let startTime = new Date().toLocaleTimeString();
 
         const pipeline = chain([
             fs.createReadStream(fullFilePath, { encoding: 'utf8' }),
@@ -26,14 +27,13 @@ module.exports = {
 
         pipeline.on('data', data => {
             cntPush = cntPush + maxArrLen;
-
-            let startTime = new Date().toLocaleTimeString();
             console.log('Start time__' + startTime);
 
             let objArrForDb = GetDataArr(data, fileDate);
             recDbStream = CreateDbStream();
             recDbStream.write(objArrForDb);
             recDbStream.end();
+            
             console.log('Insert part compete__' + cntPush)
             cntPush++;
         });
@@ -42,7 +42,6 @@ module.exports = {
         pipeline.on('end', () => {
             let endTime = new Date().toLocaleTimeString();
             console.log('Start time__' + startTime + '__End Time__' + endTime);
-            console.log('All done!');
         });
         pipeline.on('error', error => console.log(error));
 
