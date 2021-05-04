@@ -6,7 +6,6 @@ const fs = require('fs');
 const path = require('path');
 const ClickHouse = require('@apla/clickhouse');
 const chLoader = require('./UploaderToCH.js');
-const { resolve } = require('path');
 
 //#region user settings
 let pthForLoadFiles = '/home/isiv/Desktop/Projects/ClickHouse_NodeJS/Load';
@@ -22,14 +21,11 @@ fs.readdirSync(pthForLoadFiles).forEach(file => {
 
 processArray(flsForLoad);
 
-
-function processArray(flsForLoad) {
+async function processArray(flsForLoad) {
 	for (const oneFile of flsForLoad) {
-		const p = new Promise(function (resolve, reject) {
-			chLoader.UploadToCh(CH,oneFile,maxArrLen);
-		})
-		resolve();
-		p.then(console.log('File - ' + oneFile + ' has been loaded!'));
+		console.log(`Start upload file: ${oneFile}`);
+		await chLoader.UploadToCh(CH,oneFile,maxArrLen).catch((error) => console.error(error));
+		console.log(`File - ${oneFile} has been loaded!`);
 	}
 	console.log('Done All!');
   }
