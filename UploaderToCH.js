@@ -18,6 +18,7 @@ function UploadToCh(CH, fullFilePath, maxArrLen) {
         let cntPush = 0;
 
         let fileDate = GetDateByFileName(path.parse(path.basename(fullFilePath)).name);
+        let startTime = new Date().toLocaleTimeString();
 
         const pipeline = chain([
             fs.createReadStream(fullFilePath, { encoding: 'utf8' }),
@@ -27,8 +28,6 @@ function UploadToCh(CH, fullFilePath, maxArrLen) {
 
         pipeline.on('data', data => {
             cntPush = cntPush + maxArrLen;
-
-            let startTime = new Date().toLocaleTimeString();
             console.log('Start time__' + startTime);
 
             let objArrForDb = GetDataArr(data, fileDate);
